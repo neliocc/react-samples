@@ -3,6 +3,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import './styles.css';
+import TodoList from './components/TodoList';
 
 
 function Calculator(props) {
@@ -209,7 +210,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <FunctionSum />
+        <TodoList />
       </header>
     </div>
   );
