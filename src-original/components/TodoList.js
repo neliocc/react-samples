@@ -9,6 +9,7 @@ class TodoList extends React.Component {
         super(props);
         this.state={
             currentTask:"",
+            name:"",
             tasks:[]
         }
     }
@@ -45,6 +46,7 @@ class TodoList extends React.Component {
         return <div>
         <h1>My Todo List</h1>
         <input name="currentTask" onChange={this.handleInputChange} value={this.state.currentTask} type="text" /> <button onClick={this.addTask}>Add Task</button>
+        <input name="name" onChange={this.handleInputChange} value={this.state.name} type="text" /> 
         <ul>
             {this.state.tasks.map((task,index)=><TodoItem onDelete={()=>this.deleteTask(index)} key={`task-${index}`}>{task}</TodoItem>)}
         </ul>

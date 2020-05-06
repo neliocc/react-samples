@@ -4,7 +4,19 @@ import logo from './logo.svg';
 import './App.css';
 import './styles.css';
 import TodoList from './components/TodoList';
-
+import AjaxComponent from './components/Ajax';
+import {FirstFunction,SecondFunction} from './utils/Functions';
+function App() {
+  FirstFunction();
+  SecondFunction();
+  return (
+    <div className="App">
+      <header className="App-header">
+        <AjaxComponent />
+      </header>
+    </div>
+  );
+}
 
 function Calculator(props) {
   if (props.operator === "+") {
@@ -206,14 +218,6 @@ function FunctionSum() {
 </div>
 }
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <TodoList />
-      </header>
-    </div>
-  );
-}
+
 
 export default App;
