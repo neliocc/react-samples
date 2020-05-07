@@ -8,33 +8,51 @@ class AjaxComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state={
-            movies:[],
-            movie:null
+            title:"",
+            movie:null,
+            searching:false
         }
     }
 
     onFindMovie=()=>{
-        axios.get(`https://www.omdbapi.com/?s=The Lion King&apikey=trilogy`).then(response=>{
+        this.setState({
+            searching:true
+        })
+        axios.get(`https://www.omdbapi.com/?t=${this.state.title}&apikey=trilogy`).then(response=>{
+           
             this.setState({
-                movies:response.data.Search
+                movie:response.data,
+                searching:false
             })
         })
     }
+    handleInputChange=(e)=>{
+        this.setState({
+            [e.target.name]:e.target.value
+        })
+    }
 
+    renderMovie=()=>{
+        return <div>
+            <img src={this.state.movie.Poster} />
+            <div>Title: {this.state.movie.Title}</div>
+        </div>
+    }
+    renderSpinner=()=>{
+        return <div className="text-center">
+            <div class="spinner-border" role="status">
+  <span class="sr-only">Loading...</span>
+</div>
+        </div>
+    }
     render() {
-        if(this.state.movies.length>0) {
-            return this.state.movies.map((movie,index)=><div key={index}>
-            <div>{movie.Title}</div>
-            <div>Year: {movie.Year}</div>
-            <div>Genre: {movie.Genre}</div>
-        </div>)
-        } else {
-            return <div>
+        return <div>
             <h1>Find great Movies</h1>
-            
-            <button onClick={this.onFindMovie}>Find Movies</button>
+            {this.state.searching&&this.renderSpinner()}
+            {!this.state.searching&&this.state.movie&&this.renderMovie()}
+            <input name="title" value={this.state.title} onChange={this.handleInputChange} />
+            <button disabled={!this.state.title} onClick={this.onFindMovie}>Find Movie</button>
         </div>;
-        }
 
         
     }

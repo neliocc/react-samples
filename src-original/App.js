@@ -4,7 +4,7 @@ import logo from './logo.svg';
 import './App.css';
 import './styles.css';
 import TodoList from './components/TodoList';
-import AjaxComponent from './components/Ajax';
+import MultiplePages from './components/MultiplePages';
 import {FirstFunction,SecondFunction} from './utils/Functions';
 function App() {
   FirstFunction();
@@ -12,7 +12,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <AjaxComponent />
+        <MultiplePages />
       </header>
     </div>
   );
