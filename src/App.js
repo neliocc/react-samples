@@ -1,138 +1,113 @@
-import React from 'react';
-import './App.css';
-import './styles.css';
-import Signup from './components/Signup'
+import React,{Component} from 'react';
+import {BrowserRouter as Router,Link,Route,Switch} from 'react-router-dom';
 
-import {BrowserRouter as Router,Route,Link,Switch} from 'react-router-dom'
+const TodoAppContext=React.createContext({todos:[],addTodo:()=>{},markAsDone:()=>{}});
 
-
-
-export const MyExampleContext=React.createContext();
-
-function MyFunctionalComponent(props) {
-    const [name,setName]=React.useState("John Doe")
-    
-    const changeName=()=>{
-        setName("Someone Else");
+class Home extends Component {
+    state={
+        todo:""
+    };
+    handleInputChange=(e)=>{
+        this.setState({
+            [e.target.name]:e.target.value
+        })
     }
-
-    return <div>I am Functional! {name} <button onClick={changeName}>Click Me</button></div>;
-}
-
-class Page1 extends React.Component {
-    
-    render() {
-        if(!this.context.account) {
-        return <div>Please sign up first. {this.context.buttonClicked?"good! But sign up.":"Hey, click the button!"}</div>;
-        } else {
-            return <div>Hi, I am page one! And, {this.context.account.name} </div>;
+    handleEnter=(e)=>{
+        if(e.key==="Enter"&&this.state.todo!=="") {
+            this.context.addTodo(this.state.todo);
+            this.setState({
+                todo:""
+            });
+            alert("Your task has been added to the list.")
         }
     }
-}
-Page1.contextType=MyExampleContext;
 
-
-
-function Page2() {
-   const value=React.useContext(MyExampleContext);
-   if(!value.account) {
-        return <div>Please sign up first.</div>;
-    } else {
-        return <div>Hi, I am page two! And, {value.account.name} </div>;
-    }
-}
-class MyButton extends React.Component {
-    
-    
-
-    render() {
-        if(this.context.buttonClicked) {
-            return "I have been clicked!";
-        } else {
-            return <button onClick={this.context.onButtonClicked}>Click ME!</button>
-        }
-    }
-}
-MyButton.contextType=MyExampleContext;
-
-class HomePage extends React.Component {
     render() {
         return <div>
-            <h1>Home!</h1>
-            <Signup />
+            <h1>Add a ToDo</h1>
+            <input type="text" onKeyPress={this.handleEnter} name="todo" value={this.state.todo} onChange={this.handleInputChange} placeholder="Enter a task" />
+            <div>
+                You have <b>{this.context.todos.filter(todo=>todo.completed===false).length}</b> tasks pending. <Link to="/pending">View Tasks here</Link>
+            </div>
         </div>
     }
 }
+Home.contextType=TodoAppContext;
 
-class Logout extends React.Component {
 
-    render() {
-        return <MyExampleContext.Consumer>
-            {(value)=>{
-                return <button onClick={()=>value.onSignup(null)}>Logout!</button>
-            }}
-        </MyExampleContext.Consumer>
-    }
+const MyPendingTasks=()=>{
+    const globalState=React.useContext(TodoAppContext);
+    return <div>
+        <h1>Your Pending Tasks</h1>
+        <ul style={{listStyle:"none"}}>
+            {globalState.todos.filter(todo=>todo.completed===false).map(todo=><li key={todo.id}>
+                <input type="checkbox" onChange={()=>globalState.markAsDone(todo.id)} />
+                {todo.text}</li>)}
+        </ul>
+    </div>
 }
 
-class App extends React.Component {
+
+class App extends Component {
     constructor(props) {
         super(props);
         this.state={
-            name:"John Doe",
-            clicked:false
+            todos:[]
         }
     }
+
+    saveTodos=()=>{
+        localStorage.setItem("todos",JSON.stringify(this.state.todos));
+    }
     componentDidMount() {
-        console.log("I have loaded!!!")
+        const tasks=localStorage.getItem("todos");
+        if(tasks) {
+            this.setState({
+                todos:JSON.parse(tasks)
+            })
+        }
     }
     componentDidUpdate() {
+        this.saveTodos();
+    }
 
-    }
-    componentWillUnmount() {
-        
-    }
-    changeName=()=>{
+    addTodo=(text)=>{
         this.setState({
-            account:null
+            todos:[...this.state.todos,{
+                id:Date.now(),
+                text,
+                completed:false
+            }]
         })
     }
-    onSignup=(account)=>{
-        this.setState({account});
+
+    markAsDone=(todoId)=>{
+        this.setState({
+            todos:this.state.todos.map(todo=>{
+                if(todo.id===todoId) {
+                    todo.completed=true;
+                }
+                return todo;
+            })
+        })
     }
-    clickButton=()=>{
-        this.setState({clicked:true})
-    }
-    render() { 
+
+    render() {
         const globalState={
-            account:this.state.account,
-            onSignup:this.onSignup,
-            buttonClicked:this.state.clicked,
-            onButtonClicked:this.clickButton
-
-        };
-        return <div className="App">
-        <header className="App-header">
-        
-        <MyExampleContext.Provider value={globalState}>
-        <MyButton />
-            {this.state.account?<Logout />:<Signup />}
-          <Router>
-              
-              <Switch>
-                  <Route path="/page1" component={Page1} />
-                  <Route path="/page2" component={Page2} />
-                 
-              </Switch>
-
-              <div>
-              <Link to="/page1">Page 1</Link>
-              <Link to="/page2">Page 2</Link>
-          </div>
-          </Router>
-        </MyExampleContext.Provider>  
-        </header>
-        </div>
+            todos:this.state.todos,
+            addTodo:this.addTodo,
+            markAsDone:this.markAsDone
+        }
+        return <TodoAppContext.Provider value={globalState}>
+            <div style={{marginTop:"50px",marginLeft:"20%"}}>
+            <Router>
+                <Switch>
+                    <Route path="/pending" component={MyPendingTasks} />
+                    <Route component={Home} />
+                </Switch>
+            </Router>
+            </div>
+        </TodoAppContext.Provider>;
     }
 }
 export default App;
