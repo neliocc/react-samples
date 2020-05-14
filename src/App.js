@@ -1,5 +1,8 @@
 import React,{Component} from 'react';
 import {BrowserRouter as Router,Link,Route,Switch} from 'react-router-dom';
+import ReduxLikeState from './components/ReduxLikeState';
+import Count from './components/Dogs';
+import GlobalReducer from  './components/GlobalReducer';
 
 const TodoAppContext=React.createContext({todos:[],addTodo:()=>{},markAsDone:()=>{}});
 
@@ -93,21 +96,10 @@ class App extends Component {
     }
 
     render() {
-        const globalState={
-            todos:this.state.todos,
-            addTodo:this.addTodo,
-            markAsDone:this.markAsDone
-        }
-        return <TodoAppContext.Provider value={globalState}>
-            <div style={{marginTop:"50px",marginLeft:"20%"}}>
-            <Router>
-                <Switch>
-                    <Route path="/pending" component={MyPendingTasks} />
-                    <Route component={Home} />
-                </Switch>
-            </Router>
-            </div>
-        </TodoAppContext.Provider>;
+       
+        return <div style={{display:"flex",flexDirection:"column",justifyContent:"center",height:"800px",alignContent:"center",alignItems:"center"}}>
+            <GlobalReducer />
+            </div>;
     }
 }
 export default App;
