@@ -25,9 +25,7 @@ const TasksList=(props)=>{
 
     return <ul style={{listStyle:"none",margin:"0px",marginTop:"20px",padding:"0px"}}>
         {context.globalState.tasksList.filter(task=>{
-            if(task.username!==context.globalState.currentAccount) {
-                return false;
-            } else if(props.status==="pending"&&!task.completed) {
+            if(props.status==="pending"&&!task.completed) {
                 return true;
             } else if(props.status==="completed"&&task.completed) { 
                 return true;

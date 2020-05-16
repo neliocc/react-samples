@@ -1,6 +1,7 @@
 import React,{Component} from 'react'; 
 import {Link} from 'react-router-dom';
 import GlobalContext from '../../store';
+import Api from '../../api';
 
 class Login extends Component {
 
@@ -15,17 +16,19 @@ class Login extends Component {
         })
     }
     login=()=>{
-        
-        const user=this.context.globalState.usersList.find(user=>user.username===this.state.username);
-        if(user) {
-            if(user.password===this.state.password) {
-                this.context.dispatch({type:"login",payload:user})
-            } else {
-                alert("Invalid Credentials!");
-            }
+        if(!this.state.username||!this.state.password) {
+            alert("Please enter your username and password");
         } else {
-            alert("Invalid Credentials!");
+            Api.login(this.state.username,this.state.password,(user)=>{
+                if(user) {
+                    this.context.dispatch({type:"login",payload:user})
+                } else {
+                    alert("Invalid credentials!!")
+                }
+                
+            })
         }
+        
 
     }
     render() {

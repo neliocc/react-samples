@@ -1,6 +1,7 @@
 import React,{Component} from 'react'; 
 import {Link} from 'react-router-dom';
 import GlobalContext from '../../store';
+import Api from '../../api';
 
 class Signup extends Component {
 
@@ -16,13 +17,17 @@ class Signup extends Component {
     }
 
     signup=()=>{
-        this.context.dispatch({
-            type:"signup",
-            payload:{
-                username:this.state.username,
-                password:this.state.password
-            }
-        })
+        try {
+            Api.register(this.state.username,this.state.password,(user)=>{
+                this.context.dispatch({
+                    type:"signup",
+                    payload:user
+                })
+            })
+        } catch(error) {
+            alert("There has been an error!");
+        }
+        
     }
 
     render() {

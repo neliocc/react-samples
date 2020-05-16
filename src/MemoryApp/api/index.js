@@ -1,0 +1,39 @@
+import axios from 'axios';
+export default  {
+    register:(username,password,callback)=>{
+        axios.post("http://localhost:5000/register",{username,password}).then(response=>{
+            callback(response.data);
+        },error=>{
+            callback(null)
+        }).catch(error=>{
+            callback(null)
+        })
+    },
+    login:(username,password,callback)=>{
+        axios.post("http://localhost:5000/login",{username,password}).then(response=>{
+            callback(response.data);
+        },error=>{
+            callback(null)
+        }).catch(error=>{
+            callback(null)
+        })
+    },
+    addTask:(title,notes,dueDate,userId,callback)=>{
+        axios.post("http://localhost:5000/task",{title,notes,dueDate,userId}).then(response=>{
+            callback(response.data);
+        },error=>{
+            callback(null)
+        }).catch(error=>{
+            callback(null)
+        })
+    },
+    loadTasks:(userId,callback)=>{
+        axios.get(`http://localhost:5000/tasks/${userId}`).then(response=>{
+            callback(response.data);
+        },error=>{
+            callback(null)
+        }).catch(error=>{
+            callback(null)
+        })
+    }
+}

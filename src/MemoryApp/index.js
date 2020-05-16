@@ -3,23 +3,37 @@ import GlobalContext,{initialState} from './store';
 import Authorization  from './containers/Authorization';
 import Home from './containers/Home';
 import moment from 'moment';
+import Api from './api';
 
 const persistApp=(state)=>{
-    localStorage.setItem("state",JSON.stringify(state))
+    localStorage.setItem("state",state.currentAccount.id)
 }
 const reducer=(state,action)=>{
-    if(action.type==="signup") {
+    if(action.type==="tasksLoaded") {
+        debugger;
         const newState={
             ...state,
-            usersList:[...state.usersList,action.payload],
-            currentAccount:action.payload.username
+            tasksList:action.payload.tasks,
+            tasksLoaded:true
+        };
+        return newState;
+    } else if(action.type==="signup") {
+        const newState={
+            ...state,
+            currentAccount:{
+                id:action.payload._id,
+                username:action.payload.username
+            }
         }; 
         persistApp(newState);
         return newState;
     } else if(action.type==="login") {
         const newState={
             ...state,
-            currentAccount:action.payload.username
+            currentAccount:{
+                id:action.payload._id,
+                username:action.payload.username
+            }
         }; 
         persistApp(newState);
         return newState;
@@ -28,7 +42,6 @@ const reducer=(state,action)=>{
             ...state,
             tasksList:[...state.tasksList,action.payload]
         }; 
-        persistApp(newState);
         return newState;
     } else if(action.type==="taskCompleted") {
         const newState={
@@ -41,7 +54,6 @@ const reducer=(state,action)=>{
                 return task;
             })
         }; 
-        persistApp(newState);
         return newState;
     }
     return state;
@@ -53,7 +65,20 @@ const MemoryApp=()=>{
 
     const savedState=localStorage.getItem("state");
 
-    const [globalState,dispatch]=React.useReducer(reducer,savedState?JSON.parse(savedState):initialState);
+    const [globalState,dispatch]=React.useReducer(reducer,savedState?{...initialState,currentAccount:{id:savedState}}:initialState);
+
+    React.useEffect(()=>{
+        if(globalState.currentAccount&&!globalState.tasksLoaded) {
+            Api.loadTasks(globalState.currentAccount.id,(tasks)=>{
+                dispatch({
+                    type:"tasksLoaded",
+                    payload:{
+                        tasks:tasks||[]
+                    }
+                })
+            })
+        }
+    })
 
     const displaySection=()=>{
         if(!globalState.currentAccount) {

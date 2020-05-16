@@ -2,6 +2,7 @@ import React,{Component} from 'react';
 import CKEditor from 'ckeditor4-react';
 import GlobalContext from '../../store';
 import {withRouter} from 'react-router-dom';
+import Api from '../../api';
 
 
 class TaskForm extends Component {
@@ -22,21 +23,21 @@ class TaskForm extends Component {
         if(!this.state.title) {
             alert("Please enter the name of the task")
         } else {
-            this.context.dispatch(
-                {
-                    type:"newTask",
-                    payload:{
-                        title:this.state.title,
-                        notes:this.state.notes,
-                        dueDate:this.state.dueDate,
-                        completed:false,
-                        username:this.context.globalState.currentAccount,
-                        id:Date.now()
-                    }
+            Api.addTask(this.state.title,this.state.notes,this.state.dueDate,this.context.globalState.currentAccount.id,(task)=>{
+                if(!task) {
+                    alert("There has been an error, try again!");
+                } else {
+                    this.context.dispatch(
+                        {
+                            type:"newTask",
+                            payload:task
+                        }
+                    );
+                    alert("The task has been saved!");
+                    this.props.history.push("/");
                 }
-            );
-            alert("The task has been saved!");
-            this.props.history.push("/");
+            })
+            
                 
         }
     }

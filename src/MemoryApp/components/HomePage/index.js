@@ -6,7 +6,7 @@ import TasksList from '../TasksList';
 
 const HomePage=()=>{
     const context=React.useContext(GlobalContext);
-return <div>Hello {context.globalState.currentAccount}, you have <b>{context.globalState.tasksList.filter(task=>task.username===context.globalState.currentAccount&&!task.completed).length}</b> number of tasks pending.
+return <div>Hello {context.globalState.currentAccount.username}, you have <b>{context.globalState.tasksList.filter(task=>task.username===context.globalState.currentAccount&&!task.completed).length}</b> number of tasks pending.
 <TasksList status="pending" />
 <div style={{marginTop:"40px",textAlign:"center"}}>
 <Link to="/completed"> View My Completed Tasks</Link>
