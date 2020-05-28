@@ -5,12 +5,12 @@ import Home from './containers/Home';
 import moment from 'moment';
 import Api from './api';
 
+
 const persistApp=(state)=>{
     localStorage.setItem("state",state.currentAccount.id)
 }
 const reducer=(state,action)=>{
     if(action.type==="tasksLoaded") {
-        debugger;
         const newState={
             ...state,
             tasksList:action.payload.tasks,
@@ -35,6 +35,7 @@ const reducer=(state,action)=>{
                 username:action.payload.username
             }
         }; 
+        localStorage.setItem("token",action.payload.token)
         persistApp(newState);
         return newState;
     } else if(action.type==="newTask") {
@@ -63,11 +64,18 @@ const reducer=(state,action)=>{
 
 const MemoryApp=()=>{
 
-    const savedState=localStorage.getItem("state");
-
-    const [globalState,dispatch]=React.useReducer(reducer,savedState?{...initialState,currentAccount:{id:savedState}}:initialState);
+    const [globalState,dispatch]=React.useReducer(reducer,initialState);
 
     React.useEffect(()=>{
+        if(localStorage.getItem("token")&&!globalState.currentAccount) {
+            Api.authenticate((user)=>{
+                if(user) {
+                    dispatch({type:"login",payload:user});
+                } else {
+                    localStorage.clear();
+                }
+            })
+        }
         if(globalState.currentAccount&&!globalState.tasksLoaded) {
             Api.loadTasks(globalState.currentAccount.id,(tasks)=>{
                 dispatch({

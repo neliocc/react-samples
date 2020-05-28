@@ -72,7 +72,7 @@ function Button(props) {
     background:props.background,
     color:props.color
   };
-  return <button style={styling}>{props.children}</button>;
+  return <button onClick={props.onClick} style={styling}>{props.children}</button>;
 }
 
 
@@ -102,6 +102,7 @@ class MyComponent extends React.Component {
       <input value={this.state.name} onChange={this.handleInputChange} />
     <button onClick={this.sayHi}>Click Me</button>
     </div>
+    <Button onClick={()=>alert("Something")} />
     </div>
   }
 

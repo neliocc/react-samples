@@ -1,7 +1,7 @@
-import axios from 'axios';
+import HttpRequest from '../utils/HttpRequest';
 export default  {
     register:(username,password,callback)=>{
-        axios.post("http://localhost:5000/register",{username,password}).then(response=>{
+        HttpRequest.post("http://localhost:5000/register",{username,password}).then(response=>{
             callback(response.data);
         },error=>{
             callback(null)
@@ -10,7 +10,7 @@ export default  {
         })
     },
     login:(username,password,callback)=>{
-        axios.post("http://localhost:5000/login",{username,password}).then(response=>{
+        HttpRequest.post("http://localhost:5000/login",{username,password}).then(response=>{
             callback(response.data);
         },error=>{
             callback(null)
@@ -19,7 +19,7 @@ export default  {
         })
     },
     addTask:(title,notes,dueDate,userId,callback)=>{
-        axios.post("http://localhost:5000/task",{title,notes,dueDate,userId}).then(response=>{
+        HttpRequest.post("http://localhost:5000/auhenticated/task",{title,notes,dueDate,userId}).then(response=>{
             callback(response.data);
         },error=>{
             callback(null)
@@ -28,7 +28,16 @@ export default  {
         })
     },
     loadTasks:(userId,callback)=>{
-        axios.get(`http://localhost:5000/tasks/${userId}`).then(response=>{
+        HttpRequest.get(`http://localhost:5000/auhenticated/tasks/${userId}`).then(response=>{
+            callback(response.data);
+        },error=>{
+            callback(null)
+        }).catch(error=>{
+            callback(null)
+        })
+    },
+    authenticate:(callback)=>{
+        HttpRequest.get(`http://localhost:5000/authenticated/`).then(response=>{
             callback(response.data);
         },error=>{
             callback(null)
