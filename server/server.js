@@ -5,15 +5,64 @@ const app = express();
 const cors=require("cors");
 app.use(cors());
 const mongoose = require("mongoose");
+const authenticatedRoutes=require('./authenticatedRoutes');
+const router = express.Router();
 // Connect to the Mongo DB
 mongoose.connect(
   process.env.MONGODB_URI || "mongodb://localhost/mytodos",
   { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true }
 );
 
+const JWT_SECRET="samplesecret";
+
 const db=require("./models");
 const md5=require("md5");
+const jwt = require('jsonwebtoken');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const passportJWT = require("passport-jwt");
+const JWTStrategy   = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
+passport.use(new LocalStrategy({
+        usernameField: 'username',
+        passwordField: 'password'
+    }, 
+    function (username, password, cb) {
 
+      db.User.findOne({
+        username:username
+      }).then(user=>{
+        if (!user) {
+            return cb(null, false, {message: 'Incorrect email or password.'});
+        }
+        if(user.password===md5(password)) {
+          return cb(null, user, {message: 'Logged In Successfully'});
+        } else {
+          return cb(null, false, {message: 'Incorrect email or password.'});
+        }
+        
+      },error=>cb(null, false, {message: 'Incorrect email or password1.'})).catch(error=>{
+        cb(null, false, {message: 'Incorrect email or password2.'})
+      });
+    }
+));
+
+passport.use(new JWTStrategy({
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey   : JWT_SECRET
+},
+function (jwtPayload, cb) {
+  //find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
+  return db.User.findOne({_id:jwtPayload._id})
+      .then(user => {
+          const token = jwt.sign(user.toObject(), JWT_SECRET);
+          return cb(null, {...user.toObject(),token});
+      })
+      .catch(err => {
+          return cb(err);
+      });
+}
+));
 // Define middleware here
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -25,30 +74,22 @@ app.post("/register",(req,res)=>{
   }).then(user=>res.json(user),error=>res.sendStatus(500)).catch(error=>res.sendStatus(500));
 })
 
-app.post("/task",(req,res)=>{
-  db.Task.create({
-    title:req.body.title,
-    notes:req.body.notes,
-    dueDate:req.body.dueDate,
-    completed:false,
-    user:req.body.userId
-  }).then(task=>res.json(task),error=>res.sendStatus(500)).catch(error=>res.sendStatus(500));
-})
-app.get("/tasks/:user",(req,res)=>{
-  db.Task.find({user:req.params.user}).then(tasks=>res.json(tasks),error=>res.sendStatus(500)).catch(error=>res.sendStatus(500));
-})
+
 app.post("/login",(req,res)=>{
-  db.User.findOne({
-    username:req.body.username
-  }).then(user=>{
-    if(user.password===md5(req.body.password)) {
-      res.json(user);
-    } else {
-      res.sendStatus(401)
+  passport.authenticate('local', {session: false}, (err, user, info) => {
+    if (err || !user) {
+      
+        return res.status(400).json({
+            message: 'Something is not right',
+            user   : user
+        });
     }
-    
-  },error=>res.sendStatus(500)).catch(error=>res.sendStatus(500));
-})
+    const token = jwt.sign(user.toObject(), JWT_SECRET);
+    return res.json({username:user.username, token});
+})(req, res);
+});
+
+app.use('/authenticated', passport.authenticate('jwt', {session: false}), authenticatedRoutes);
 
 app.get("/",(req,res)=>{
   res.sendStatus(200);

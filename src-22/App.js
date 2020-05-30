@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import Wrapper from "./components/Wrapper";
 
 function App() {
+  const [name,setName]=React.useState("John Doe")
   return (
     <Router>
       <div>

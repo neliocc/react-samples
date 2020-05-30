@@ -20,6 +20,7 @@ class Login extends Component {
             alert("Please enter your username and password");
         } else {
             Api.login(this.state.username,this.state.password,(user)=>{
+                debugger;
                 if(user) {
                     this.context.dispatch({type:"login",payload:user})
                 } else {
